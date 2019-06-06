@@ -3,6 +3,9 @@ package ru.gaz_is.dbapi;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.sql.Connection;
@@ -12,6 +15,7 @@ import java.sql.Statement;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest {
@@ -25,6 +29,9 @@ public class UserServiceTest {
     ResultSet mockRS;
     @Mock
     UserService service;
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
+
     private User thirdUser;
 
 
@@ -40,7 +47,7 @@ public class UserServiceTest {
 
 
     @Test
-    public void whenUpdateWithMockito() throws SQLException {
+    public void whenUpdateWithOutMockito() throws SQLException {
         service = new UserService();
         String expect = "newSurname8259";
         User user = service.getFor("ivan666");
@@ -71,5 +78,13 @@ public class UserServiceTest {
     public void updateUserMock() throws SQLException {
         thirdUser.setSurname("testSur");
         service.updateFor(thirdUser);
+        verify(service, times(1)).updateFor(thirdUser);
+    }
+
+    @Test
+    public void whenSeachByNameThenShouldReturnSeachUser() throws SQLException {
+        when(service.getFor(thirdUser.getUsername())).thenReturn(thirdUser);
+        User searchUser = service.getFor(thirdUser.getUsername());
+        assertThat(searchUser, is(thirdUser));
     }
 }
